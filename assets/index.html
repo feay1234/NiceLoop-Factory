@@ -1,0 +1,63 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <link href="css\bootmetro.css" rel="stylesheet">
+    <link href="css\bootstrap-responsive.css" rel="stylesheet">
+    <link href="css\bootmetro-icons.css" rel="stylesheet">
+  </head>
+  <style type="text/css">
+
+  </style>
+  <body>
+  	
+  	<div class="row" style="margin:20px;">
+        <a href="#" class="btn btn-large btn-primary btn-block" onClick="displayFeedActivity()">
+           <i class="listview-item-object icon-text"></i>
+           <br>
+           <br>
+           <h1>NEW FEED</h1>
+        </a>
+        <br>
+        <a href="#" class="btn btn-large btn-primary btn-block" onClick="displayCamera()">
+           
+           <i class="listview-item-object icon-camera-2"></i>
+           <br>
+           <br>
+           <h1>CAMERA</h1>
+        </a>
+        <br>
+        <a href="#" class="btn btn-large btn-primary btn-block" onClick="displayManageActivity()">
+           
+           <i class="listview-item-object icon-image"></i>
+           <br>
+           <br>
+           <h1>MANAGE PHOTO</h1>
+        </a>
+
+        
+  	</div>  
+    
+
+
+   	<script type="text/javascript">
+	    function displayFeedActivity() {
+	        Android.displayFeedActivity();
+	    }
+	    function displayCamera(){
+	    	Android.displayCamera();
+	    }
+	    function displayManageActivity(){
+	    	Android.displayManageActivity();
+	    }
+	</script>
+    
+
+  </body>
+</html>
