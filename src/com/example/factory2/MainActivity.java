@@ -1,11 +1,9 @@
 package com.example.factory2;
 
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.Transparency;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -15,6 +13,9 @@ import java.util.Date;
 
 import javax.imageio.ImageIO;
 
+import org.imgscalr.Scalr;
+
+
 
 import android.app.Activity;
 import android.content.Intent;
@@ -22,6 +23,7 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
+import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -92,33 +94,108 @@ public class MainActivity extends Activity {
     	
 	}
 	
+	public Bitmap getResizedBitmap(Bitmap bm, int newHeight, int newWidth)
+	{
+	    int width = bm.getWidth();
+	    int height = bm.getHeight();
+	    float scaleWidth = ((float) newWidth) / width;
+	    float scaleHeight = ((float) newHeight) / height;
+	    // create a matrix for the manipulation
+	    Matrix matrix = new Matrix();
+	    // resize the bit map
+	    matrix.postScale(scaleWidth, scaleHeight);
+	    // recreate the new Bitmap
+	    Bitmap resizedBitmap = Bitmap.createBitmap(bm, 0, 0, width, height, matrix, false);
+	    return resizedBitmap;
+	}
+	
 	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		
+		
+		
+		// Get the source image's dimensions
+		BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inJustDecodeBounds = true;
+		BitmapFactory.decodeFile(mCurrentPhotoPath, options);
+		int srcWidth = options.outWidth;
+		int srcHeight = options.outHeight;
+		int desiredWidth = 400;
+		// Only scale if the source is big enough. This code is just trying to fit a image into a certain width.
+		if(desiredWidth  > srcWidth)
+		    desiredWidth = srcWidth;
+
+
+
+		// Calculate the correct inSampleSize/scale value. This helps reduce memory use. It should be a power of 2
+		// from: http://stackoverflow.com/questions/477572/android-strange-out-of-memory-issue/823966#823966
+		int inSampleSize = 1;
+		while(srcWidth / 2 > desiredWidth){
+		    srcWidth /= 2;
+		    srcHeight /= 2;
+		    inSampleSize *= 2;
+		}
+
+		float desiredScale = (float) desiredWidth / srcWidth;
+
+		// Decode with inSampleSize
+		options.inJustDecodeBounds = false;
+		options.inDither = false;
+		options.inSampleSize = inSampleSize;
+		options.inScaled = false;
+		options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+		Bitmap sampledSrcBitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, options);
+
+		// Resize
+		Matrix matrix = new Matrix();
+		matrix.postScale(desiredScale, desiredScale);
+		Bitmap scaledBitmap = Bitmap.createBitmap(sampledSrcBitmap, 0, 0, sampledSrcBitmap.getWidth(), sampledSrcBitmap.getHeight(), matrix, true);
+		sampledSrcBitmap = null;
+
+		// Save
+		File file;
+		try {
+			file = createImageFile();
+			file.createNewFile();
+			FileOutputStream out = new FileOutputStream(file.getAbsolutePath());
+			scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 50, out);
+			scaledBitmap = null;
+			file = new File(mCurrentPhotoPath);
+			file.delete();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
 
 //		if (requestCode == -1) {
             //2
-            Bitmap thumbnail = (Bitmap) data.getExtras().get("data");  
-            mImage.setImageBitmap(thumbnail);
-            //3
-            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-            //4
-//            thumbnail.compress(Bitmap.CompressFormat.PNG, 90, bytes);
-
-            thumbnail.compress(Bitmap.CompressFormat.PNG, 100, bytes);
-            /* Write bitmap to file using JPEG and 80% quality hint for JPEG. */
-            
-            try {
-            	 File file = createImageFile();
-                file.createNewFile();
-                FileOutputStream fo = new FileOutputStream(file);
-                //5
-                fo.write(bytes.toByteArray());
-                fo.close();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+//            Bitmap thumbnail = (Bitmap) data.getExtras().get("data");  
+//            mImage.setImageBitmap(thumbnail);
+//            
+//            
+//            Bitmap resized = Bitmap.createScaledBitmap(thumbnail, 400, 400, true);
+//            //3
+//            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+//            //4
+////            thumbnail.compress(Bitmap.CompressFormat.PNG, 90, bytes);
+//
+//            resized.compress(Bitmap.CompressFormat.PNG, 100, bytes);
+//            /* Write bitmap to file using JPEG and 80% quality hint for JPEG. */
+//            
+//            try {
+//            	 File file = createImageFile();
+//                file.createNewFile();
+//                FileOutputStream fo = new FileOutputStream(file);
+//                //5
+//                fo.write(bytes.toByteArray());
+//                fo.close();
+//            } catch (IOException e) {
+//                // TODO Auto-generated catch block
+//                e.printStackTrace();
+//            }
 //        }
 //		if (resultCode == -1) {
 //			handleBigCameraPhoto();
@@ -136,59 +213,7 @@ public class MainActivity extends Activity {
 		}
 
 	}
-	public BufferedImage scale(BufferedImage img, int targetWidth, int targetHeight) {
-
-	    int type = (img.getTransparency() == Transparency.OPAQUE) ? BufferedImage.TYPE_INT_RGB : BufferedImage.TYPE_INT_ARGB;
-	    BufferedImage ret = img;
-	    BufferedImage scratchImage = null;
-	    Graphics2D g2 = null;
-
-	    int w = img.getWidth();
-	    int h = img.getHeight();
-
-	    int prevW = w;
-	    int prevH = h;
-
-	    do {
-	        if (w > targetWidth) {
-	            w /= 2;
-	            w = (w < targetWidth) ? targetWidth : w;
-	        }
-
-	        if (h > targetHeight) {
-	            h /= 2;
-	            h = (h < targetHeight) ? targetHeight : h;
-	        }
-
-	        if (scratchImage == null) {
-	            scratchImage = new BufferedImage(w, h, type);
-	            g2 = scratchImage.createGraphics();
-	        }
-
-	        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-	                RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-	        g2.drawImage(ret, 0, 0, w, h, 0, 0, prevW, prevH, null);
-
-	        prevW = w;
-	        prevH = h;
-	        ret = scratchImage;
-	    } while (w != targetWidth || h != targetHeight);
-
-	    if (g2 != null) {
-	        g2.dispose();
-	    }
-
-	    if (targetWidth != ret.getWidth() || targetHeight != ret.getHeight()) {
-	        scratchImage = new BufferedImage(targetWidth, targetHeight, type);
-	        g2 = scratchImage.createGraphics();
-	        g2.drawImage(ret, 0, 0, null);
-	        g2.dispose();
-	        ret = scratchImage;
-	    }
-
-	    return ret;
-
-	}
+	
 	private void setPic() {
 
 		/* There isn't enough memory to open up more than a couple camera photos */
@@ -288,7 +313,13 @@ public class MainActivity extends Activity {
 			try {
 				f = setUpPhotoFile();
 				mCurrentPhotoPath = f.getAbsolutePath();
-//				takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(f));
+				takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(f));
+				
+				
+				
+//				BufferedImage originalImage = ImageIO.read(f);
+//				BufferedImage scaledImg = Scalr.resize(originalImage, 400);	
+//				ImageIO.write(scaledImg, "png", new File(mCurrentPhotoPath)); 
 			} catch (IOException e) {
 				e.printStackTrace();
 				f = null;
