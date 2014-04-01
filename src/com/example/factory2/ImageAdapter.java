@@ -67,7 +67,7 @@ public class ImageAdapter extends BaseAdapter {
         return imageView;
     }
 
-    private Bitmap decodeFile(File f){
+    static Bitmap decodeFile(File f){
         try {
             //Decode image size
             BitmapFactory.Options o = new BitmapFactory.Options();

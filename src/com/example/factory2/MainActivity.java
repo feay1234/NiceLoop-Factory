@@ -65,8 +65,8 @@ public class MainActivity extends Activity {
 	
 	@JavascriptInterface
     public void displayFeedActivity() {
-    	intent = new Intent(this, GalleryPage.class);
-    	startActivity(intent);
+//    	intent = new Intent(this, GalleryPage.class);
+//    	startActivity(intent);
     }
 	
 	@JavascriptInterface

@@ -34,11 +34,13 @@
         </activity>
         <activity
             android:name="com.example.factory2.ManageActivity"
-            android:label="@string/title_activity_manage" >
+            android:label="@string/title_activity_manage"
+            android:theme="@style/Theme.AppCompat" >
         </activity>
         <activity
             android:name="com.example.factory2.CommentActivity"
-            android:label="@string/title_activity_comment" >
+            android:label="@string/title_activity_comment"
+            android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
             android:name="com.example.factory2.ImageActivity"

@@ -15,7 +15,7 @@
 	    <TextView
 	        android:layout_width="match_parent" 
 	        android:layout_height="wrap_content"
-	        android:text="Add Comment"
+	        android:text="Add or Edit Comment"
 	        android:textSize="20sp" >
 	        
 	    </TextView>
@@ -28,7 +28,7 @@
 	        android:id="@+id/uploadBtn"
 	        android:layout_width="match_parent" 
 	        android:layout_height="wrap_content"
-	        android:text="Upload">
+	        android:text="Save Comment">
 	       
 	    </Button>
 	</LinearLayout>
