@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import niceloop.th.factory.UploadFiles;
+
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -19,8 +21,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.example.factory2.R;
-import com.example.factory2.UploadFiles;
+import niceloop.th.factory.R;
 import com.manuelpeinado.multichoiceadapter.MultiChoiceBaseAdapter;
 
 import database.DatabaseHandler;
